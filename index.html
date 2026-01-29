@@ -425,7 +425,7 @@ window.fadeOutTrack = function (trackId, durationMs, onDone) {
 /* === CONFIG === */
 setup.HUD = {
   // картинка одной жизни
-  lifeIcon:"images/life.png",
+    lifeIcon:"images/life.png",
 
   // лица (ключ -> путь)
   faces: {
@@ -436,6 +436,7 @@ setup.HUD = {
     cry:"images/face_cry.png",
     indifferent:"images/face_indifferent.png",
   },
+  
 
   maxLives: 10,
   gameOverPassage: "GameOverCut" // название пассажа проигрыша
@@ -622,40 +623,43 @@ $(document).on(":passagedisplay", function () {
 &lt;/div&gt;</tw-passagedata><tw-passagedata pid="13" name="OLD START" tags="" position="25,525" size="100,100">It is
 
 Для запуска - пожалуйста нажми &lt;span class=&quot;start-btn&quot;&gt;[[START-&gt;AUDIO]]&lt;/span&gt;</tw-passagedata><tw-passagedata pid="14" name="EnglishName" tags="ENG" position="1000,300" size="100,100">&lt;&lt;set $lang = &quot;en&quot;&gt;&gt;
+&lt;div class=&quot;qwin&quot;&gt;
 What is your name?
 
 &lt;&lt;textbox &quot;$playerName&quot; &quot;&quot; autocapitalize autofocus&gt;&gt;
 
-&lt;span class=&quot;btn&quot;&gt;[[CONTINUE-&gt;Chapter_0ENG]]&lt;/span&gt;</tw-passagedata><tw-passagedata pid="15" name="DeutschName" tags="DE" position="1000,500" size="100,100">&lt;&lt;set $lang = &quot;de&quot;&gt;&gt;
+&lt;span class=&quot;btn&quot;&gt;[[CONTINUE-&gt;Chapter_0ENG]]&lt;/span&gt;
+&lt;/div&gt;</tw-passagedata><tw-passagedata pid="15" name="DeutschName" tags="DE" position="1000,500" size="100,100">&lt;&lt;set $lang = &quot;de&quot;&gt;&gt;
+&lt;div class=&quot;qwin&quot;&gt;
 Wie heißt du?
 
 &lt;&lt;textbox &quot;$playerName&quot; &quot;&quot;&gt;&gt;
 
-&lt;span class=&quot;btn&quot;&gt;[[WEITER-&gt;Chapter_0DE]]&lt;/span&gt;</tw-passagedata><tw-passagedata pid="16" name="Chapter_0ENG" tags="ENG" position="1150,300" size="100,100">&lt;&lt;set $hudOn = true&gt;&gt;
+&lt;span class=&quot;btn&quot;&gt;[[WEITER-&gt;Chapter_0DE]]&lt;/span&gt;
+&lt;/div&gt;</tw-passagedata><tw-passagedata pid="16" name="Chapter_0ENG" tags="ENG" position="1150,300" size="100,100">&lt;&lt;set $hudOn = true&gt;&gt;
 &lt;&lt;run setup.setFace(&quot;neutral&quot;)&gt;&gt;
-
-Hello, $playerName.
 &lt;&lt;set $music = &quot;Ch0ENG&quot;&gt;&gt;
 &lt;&lt;audio $music play &gt;&gt;
 
-&lt;&lt;timed 3s&gt;&gt;
-
 &lt;div class=&quot;qwin&quot;&gt;
-  &lt;div class=&quot;qtext&quot;&gt;Please respond: do you understand these rules, $playerName?&lt;/div&gt;
+Hello, $playerName.
+ &lt;&lt;timed 3s&gt;&gt;
+Please respond: do you understand these rules, $playerName?
   
 &lt;span class=&quot;btn&quot;&gt;[[YES-&gt;Chapter_0.1ENG]]&lt;/span&gt;
-&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="17" name="Chapter_0DE" tags="" position="1150,500" size="100,100">&lt;&lt;set $hudOn = true&gt;&gt;
+&lt;&lt;/timed&gt;&gt;
+&lt;/div&gt;</tw-passagedata><tw-passagedata pid="17" name="Chapter_0DE" tags="" position="1150,500" size="100,100">&lt;&lt;set $hudOn = true&gt;&gt;
 &lt;&lt;run setup.setFace(&quot;neutral&quot;)&gt;&gt;
-
-Hallo, $playerName.
 &lt;&lt;set $music = &quot;Ch0DE&quot;&gt;&gt;
 &lt;&lt;audio $music play &gt;&gt;
 
-&lt;&lt;timed 3s&gt;&gt;
 &lt;div class=&quot;qwin&quot;&gt;
-  &lt;div class=&quot;qtext&quot;&gt;Bitte antworte: hast du diese Regeln verstanden, $playerName?&lt;/div&gt;
+Hallo, $playerName.
+&lt;&lt;timed 3s&gt;&gt;
+Bitte antworte: hast du diese Regeln verstanden, $playerName?
 &lt;span class=&quot;btn&quot;&gt;[[JA-&gt;Chapter_0.1DE]]&lt;/span&gt;
-&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="18" name="Chapter_0.1ENG" tags="" position="1275,300" size="100,100">&lt;&lt;audio $music fadeoverto 2 0&gt;&gt;
+&lt;&lt;/timed&gt;&gt;
+&lt;/div&gt;</tw-passagedata><tw-passagedata pid="18" name="Chapter_0.1ENG" tags="" position="1275,300" size="100,100">&lt;&lt;audio $music fadeoverto 2 0&gt;&gt;
 &lt;&lt;timed 2s&gt;&gt;&lt;&lt;goto &quot;Chapter_1ENG&quot;&gt;&gt;&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="19" name="OLD CASH AUDIO" tags="" position="150,225" size="100,100">window.fadeOutTrack = function (trackId, durationMs, onDone) {
 	// SimpleAudio API (SugarCube)
 	const audio = SugarCube?.SimpleAudio;
@@ -690,10 +694,11 @@ Hallo, $playerName.
 	}, stepTime);
 };
 </tw-passagedata><tw-passagedata pid="20" name="Chapter_0.1DE" tags="" position="1275,500" size="100,100">&lt;&lt;audio $music fadeoverto 2 0&gt;&gt;
-&lt;&lt;timed 2s&gt;&gt;&lt;&lt;goto &quot;Chapter_1DE&quot;&gt;&gt;&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="21" name="Chapter_1DE" tags="" position="1400,500" size="100,100">&lt;&lt;set $music = &quot;Ch1DE&quot;&gt;&gt;
+&lt;&lt;timed 2s&gt;&gt;&lt;&lt;goto &quot;Chapter_1DE&quot;&gt;&gt;&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="21" name="Chapter_1DE" tags="" position="1400,500" size="100,100">&lt;h1&gt;Kapitel 1&lt;/h1&gt;
+&lt;&lt;set $music = &quot;Ch1DE&quot;&gt;&gt;
 &lt;&lt;audio $music play loop&gt;&gt;
 
-Kapitel 1
+
 
 &lt;&lt;timed 3s&gt;&gt;
 &lt;div class=&quot;qwin&quot;&gt;
@@ -702,51 +707,49 @@ Was hörst du jetzt, $playerName?
 &lt;div class=&quot;answer-grid&quot;&gt; &lt;span class=&quot;btn&quot;&gt;[[Den Herzschlag der Mutter-&gt;Chapter_1.1DE]]&lt;/span&gt; &lt;span class=&quot;btn&quot;&gt;[[Das Rattern von Rädern-&gt;Das Rattern von Rädern]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Kuckuck-&gt;Kuckuck]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Countdown-&gt;CountdownDE]]&lt;/span&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;&lt;/timed&gt;&gt;
-</tw-passagedata><tw-passagedata pid="22" name="Clatter_of_Wheels" tags="" position="1500,100" size="100,100">&lt;&lt;run setup.loseLife(1)&gt;&gt;
+</tw-passagedata><tw-passagedata pid="22" name="Clatter_of_Wheels" tags="" position="1500,100" size="100,100">&lt;h1&gt;Chapter 1&lt;/h1&gt;
+&lt;&lt;run setup.loseLife(1)&gt;&gt;
 &lt;&lt;run setup.setFace(&quot;sad&quot;)&gt;&gt;
-Chapter 1
-
-No, that&#39;s not correct. Try again.
-
 
 
 &lt;div class=&quot;qwin&quot;&gt;
+No, that&#39;s not correct. Try again.
+
 What do you hear now, $playerName?
 
 &lt;div class=&quot;answer-grid&quot;&gt; &lt;span class=&quot;btn&quot;&gt;[[Mother&#39;s heartbeat-&gt;Chapter_1.1ENG]]&lt;/span&gt; &lt;span class=&quot;btn&quot;&gt;[[The clatter of wheels-&gt;Clatter_of_Wheels]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Cuckoo-&gt;Cuckoo]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Countdown-&gt;Countdown]]&lt;/span&gt;&lt;/div&gt;
-&lt;/div&gt;</tw-passagedata><tw-passagedata pid="23" name="Cuckoo" tags="" position="1400,100" size="100,100">&lt;&lt;run setup.loseLife(1)&gt;&gt;
+&lt;/div&gt;</tw-passagedata><tw-passagedata pid="23" name="Cuckoo" tags="" position="1400,100" size="100,100">&lt;h1&gt;Chapter 1&lt;/h1&gt;
+&lt;&lt;run setup.loseLife(1)&gt;&gt;
 &lt;&lt;run setup.setFace(&quot;sad&quot;)&gt;&gt;
-Chapter 1
-
-No, that&#39;s not correct. Try again.
 
 
 &lt;div class=&quot;qwin&quot;&gt;
+No, that&#39;s not correct. Try again.
+
 What do you hear now, $playerName?
 
 &lt;div class=&quot;answer-grid&quot;&gt; &lt;span class=&quot;btn&quot;&gt;[[Mother&#39;s heartbeat-&gt;Chapter_1.1ENG]]&lt;/span&gt; &lt;span class=&quot;btn&quot;&gt;[[The clatter of wheels-&gt;Clatter_of_Wheels]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Cuckoo-&gt;Cuckoo]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Countdown-&gt;Countdown]]&lt;/span&gt;&lt;/div&gt;
 &lt;/div&gt;
-</tw-passagedata><tw-passagedata pid="24" name="Countdown" tags="" position="1300,100" size="100,100">&lt;&lt;run setup.loseLife(1)&gt;&gt;
+</tw-passagedata><tw-passagedata pid="24" name="Countdown" tags="" position="1300,100" size="100,100">&lt;h1&gt;Chapter 1&lt;/h1&gt;
+&lt;&lt;run setup.loseLife(1)&gt;&gt;
 &lt;&lt;run setup.setFace(&quot;sad&quot;)&gt;&gt;
-Chapter 1
 
+&lt;div class=&quot;qwin&quot;&gt;
 You have incorrectly identified the sound. System malfunction. Game over. 
 Just kidding.
 
-
-&lt;div class=&quot;qwin&quot;&gt;
 What do you hear now, $playerName?
 
 &lt;div class=&quot;answer-grid&quot;&gt; &lt;span class=&quot;btn&quot;&gt;[[Mother&#39;s heartbeat-&gt;Chapter_1.1ENG]]&lt;/span&gt; &lt;span class=&quot;btn&quot;&gt;[[The clatter of wheels-&gt;Clatter_of_Wheels]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Cuckoo-&gt;Cuckoo]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Countdown-&gt;Countdown]]&lt;/span&gt;&lt;/div&gt;
 &lt;/div&gt;
 </tw-passagedata><tw-passagedata pid="25" name="Chapter_1.1ENG" tags="" position="1600,300" size="100,100">&lt;&lt;run setup.setFace(&quot;neutral&quot;)&gt;&gt;
 &lt;&lt;audio $music fadeoverto 2 0&gt;&gt;
-&lt;&lt;timed 2s&gt;&gt;&lt;&lt;goto &quot;Chapter_2ENG&quot;&gt;&gt;&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="26" name="Chapter_2ENG" tags="" position="1700,300" size="100,100">Chapter 2
+&lt;&lt;timed 2s&gt;&gt;&lt;&lt;goto &quot;Chapter_2ENG&quot;&gt;&gt;&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="26" name="Chapter_2ENG" tags="" position="1700,300" size="100,100">&lt;h1&gt;Chapter 2&lt;/h1&gt;
 
-Yes, that&#39;s right. This is what you felt first of all.</tw-passagedata><tw-passagedata pid="27" name="Chapter_1ENG" tags="" position="1400,300" size="100,100">&lt;&lt;set $music = &quot;Ch1ENG&quot;&gt;&gt;
+&lt;div class=&quot;qwin&quot;&gt;
+Yes, that&#39;s right. This is what you felt first of all.&lt;/div&gt;</tw-passagedata><tw-passagedata pid="27" name="Chapter_1ENG" tags="" position="1400,300" size="100,100">&lt;h1&gt;Chapter 1&lt;/h1&gt;
+&lt;&lt;set $music = &quot;Ch1ENG&quot;&gt;&gt;
 &lt;&lt;audio $music play loop &gt;&gt;
-
-Chapter 1
 
 
 &lt;&lt;timed 3s&gt;&gt;
@@ -770,41 +773,38 @@ GAME OVER DE</tw-passagedata><tw-passagedata pid="32" name="GameOverCut" tags=""
 &lt;&lt;/if&gt;&gt;
 </tw-passagedata><tw-passagedata pid="33" name="Chapter_1.1DE" tags="" position="1600,500" size="100,100">&lt;&lt;run setup.setFace(&quot;neutral&quot;)&gt;&gt;
 &lt;&lt;audio $music fadeoverto 2 0&gt;&gt;
-&lt;&lt;timed 2s&gt;&gt;&lt;&lt;goto &quot;Chapter_2DE&quot;&gt;&gt;&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="34" name="Kuckuck" tags="" position="1400,700" size="100,100">&lt;&lt;run setup.loseLife(1)&gt;&gt;
+&lt;&lt;timed 2s&gt;&gt;&lt;&lt;goto &quot;Chapter_2DE&quot;&gt;&gt;&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="34" name="Kuckuck" tags="" position="1400,700" size="100,100">&lt;h1&gt;Kapitel 1&lt;/h1&gt;
+&lt;&lt;run setup.loseLife(1)&gt;&gt;
 &lt;&lt;run setup.setFace(&quot;sad&quot;)&gt;&gt;
-Kapitel 1
-
-Nein, das ist nicht richtig. Versuch&#39;s nochmal.
 
 &lt;div class=&quot;qwin&quot;&gt;
+Nein, das ist nicht richtig. Versuch&#39;s nochmal.
+
 Was hörst du jetzt, $playerName?
 
 &lt;div class=&quot;answer-grid&quot;&gt; &lt;span class=&quot;btn&quot;&gt;[[Den Herzschlag der Mutter-&gt;Chapter_1.1DE]]&lt;/span&gt; &lt;span class=&quot;btn&quot;&gt;[[Das Rattern von Rädern-&gt;Das Rattern von Rädern]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Kuckuck-&gt;Kuckuck]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Countdown-&gt;CountdownDE]]&lt;/span&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="35" name="CountdownDE" tags="" position="1300,700" size="100,100">&lt;&lt;run setup.loseLife(1)&gt;&gt;
+&lt;/div&gt;</tw-passagedata><tw-passagedata pid="35" name="CountdownDE" tags="" position="1300,700" size="100,100">&lt;h1&gt;Kapitel 1&lt;/h1&gt;
+&lt;&lt;run setup.loseLife(1)&gt;&gt;
 &lt;&lt;run setup.setFace(&quot;sad&quot;)&gt;&gt;
-Kapitel 1
 
+&lt;div class=&quot;qwin&quot;&gt;
 Du hast das Geräusch falsch identifiziert. Systemfehler. Game over. 
 War nur Spaß.
 
-&lt;div class=&quot;qwin&quot;&gt;
 Was hörst du jetzt, $playerName?
 
 &lt;div class=&quot;answer-grid&quot;&gt; &lt;span class=&quot;btn&quot;&gt;[[Den Herzschlag der Mutter-&gt;Chapter_1.1DE]]&lt;/span&gt; &lt;span class=&quot;btn&quot;&gt;[[Das Rattern von Rädern-&gt;Das Rattern von Rädern]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Kuckuck-&gt;Kuckuck]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Countdown-&gt;CountdownDE]]&lt;/span&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="36" name="Das Rattern von Rädern" tags="" position="1500,700" size="100,100">&lt;&lt;run setup.loseLife(1)&gt;&gt;
+&lt;/div&gt;</tw-passagedata><tw-passagedata pid="36" name="Das Rattern von Rädern" tags="" position="1500,700" size="100,100">&lt;h1&gt;Kapitel 1&lt;/h1&gt;
+&lt;&lt;run setup.loseLife(1)&gt;&gt;
 &lt;&lt;run setup.setFace(&quot;sad&quot;)&gt;&gt;
-Kapitel 1
 
+&lt;div class=&quot;qwin&quot;&gt;
 Nein, das ist nicht richtig. Versuch&#39;s nochmal.
 
-&lt;div class=&quot;qwin&quot;&gt;
 Was hörst du jetzt, $playerName?
 
 &lt;div class=&quot;answer-grid&quot;&gt; &lt;span class=&quot;btn&quot;&gt;[[Den Herzschlag der Mutter-&gt;Chapter_1.1DE]]&lt;/span&gt; &lt;span class=&quot;btn&quot;&gt;[[Das Rattern von Rädern-&gt;Das Rattern von Rädern]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Kuckuck-&gt;Kuckuck]]&lt;/span&gt;&lt;span class=&quot;btn&quot;&gt;[[Countdown-&gt;CountdownDE]]&lt;/span&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="37" name="Chapter_2DE" tags="" position="1700,500" size="100,100">Kapitel 2</tw-passagedata><tw-passagedata pid="38" name="OLD CSS" tags="" position="250,225" size="100,100">/* кнопки */
+&lt;/div&gt;</tw-passagedata><tw-passagedata pid="37" name="Chapter_2DE" tags="" position="1700,500" size="100,100">&lt;h1&gt;Kapitel 2&lt;/h1&gt;</tw-passagedata><tw-passagedata pid="38" name="OLD CSS" tags="" position="250,225" size="100,100">/* кнопки */
 .btn a.link-internal {
   display: inline-block;
   padding: 14px 28px;
@@ -863,7 +863,11 @@ Was hörst du jetzt, $playerName?
   width: 56px;
   height: 56px;
   object-fit: contain;
-}</tw-passagedata><tw-passagedata pid="39" name="FACES" tags="" position="275,900" size="100,100">  faces: {
+}</tw-passagedata><tw-passagedata pid="39" name="FACES" tags="" position="500,900" size="100,100">  // картинка одной жизни
+  lifeIcon:&quot;/Users/oleg_khristolyubskii/Documents/03 - Work/04 - Theater/04 - 100 seconds/28.01.26_Razam/images/life.png&quot;,
+
+  // лица (ключ -&gt; путь)
+  faces: {
     neutral:&quot;/Users/oleg_khristolyubskii/Documents/03 - Work/04 - Theater/04 - 100 seconds/28.01.26_Razam/images/face_neutral.png&quot;,
     happy:&quot;/Users/oleg_khristolyubskii/Documents/03 - Work/04 - Theater/04 - 100 seconds/28.01.26_Razam/images/face_happy.png&quot;,
     sad:&quot;/Users/oleg_khristolyubskii/Documents/03 - Work/04 - Theater/04 - 100 seconds/28.01.26_Razam/images/face_sad.png&quot;,
