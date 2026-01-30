@@ -150,6 +150,34 @@ h1[style*="--tw:"]::after{
   50%      { opacity: 1; }
 }
 
+@media (max-width: 700px){
+  /* многострочная "печать" на мобилке */
+  h1[style*="--tw:"]{
+    white-space: normal;      /* разрешаем перенос */
+    overflow: hidden;
+    display: inline-block;
+
+    /* печать через "расширение области набора" */
+    clip-path: none;
+    max-width: 0;
+
+    animation:
+      h1-expand 2.2s steps(var(--tw), end) forwards,
+      h1-caret-blink 0.9s step-end infinite;
+  }
+
+  /* курсор остаётся на краю набора */
+  h1[style*="--tw:"]::after{
+    right: 0;
+  }
+
+  @keyframes h1-expand{
+    from { max-width: 0; }
+    to   { max-width: 92vw; }  /* можно 94vw/96vw, если надо шире */
+  }
+}
+
+
 
 /* =========================
    VARIABLES
@@ -694,7 +722,7 @@ and Oleg Hristolübskiy&lt;/h3&gt;
 &lt;div class=&quot;answer-grid&quot;&gt; &lt;span class=&quot;btn&quot;&gt;[[English-&gt;EnglishName]]&lt;/span&gt; &lt;span class=&quot;btn&quot;&gt;[[Deutsch-&gt;DeutschName]]&lt;/span&gt;&lt;/div&gt;
 &lt;/div&gt;</tw-passagedata><tw-passagedata pid="13" name="OLD START" tags="" position="25,525" size="100,100">It is
 
-Для запуска - пожалуйста нажми &lt;span class=&quot;start-btn&quot;&gt;[[START-&gt;AUDIO]]&lt;/span&gt;</tw-passagedata><tw-passagedata pid="14" name="EnglishName" tags="ENG" position="1000,300" size="100,100">&lt;&lt;set $lang = &quot;en&quot;&gt;&gt;
+Для запуска - пожалуйста нажми &lt;span class=&quot;start-btn&quot;&gt;[[START-&gt;AUDIO]]&lt;/span&gt;</tw-passagedata><tw-passagedata pid="14" name="EnglishName" tags="ENG" position="950,300" size="100,100">&lt;&lt;set $lang = &quot;en&quot;&gt;&gt;
 &lt;div class=&quot;qwin&quot;&gt;
 What is your name?
 
@@ -708,7 +736,8 @@ Wie heißt du?
 &lt;&lt;textbox &quot;$playerName&quot; &quot;&quot;&gt;&gt;
 
 &lt;span class=&quot;btn&quot;&gt;[[WEITER-&gt;Chapter_0DE]]&lt;/span&gt;
-&lt;/div&gt;</tw-passagedata><tw-passagedata pid="16" name="Chapter_0ENG" tags="ENG" position="1150,300" size="100,100">&lt;&lt;set $hudOn = true&gt;&gt;
+&lt;/div&gt;</tw-passagedata><tw-passagedata pid="16" name="Chapter_0ENG" tags="ENG" position="1150,300" size="100,100">&lt;h1 style=&quot;--tw: 9;&quot;&gt;Chapter 0&lt;/h1&gt;
+&lt;&lt;set $hudOn = true&gt;&gt;
 &lt;&lt;run setup.setFace(&quot;neutral&quot;)&gt;&gt;
 &lt;&lt;set $music = &quot;Ch0ENG&quot;&gt;&gt;
 &lt;&lt;audio $music play &gt;&gt;
@@ -1375,7 +1404,7 @@ You lost this game.&lt;/h1&gt;
 &lt;&lt;timed 2s&gt;&gt;&lt;&lt;goto &quot;Chapter_13.3ENG&quot;&gt;&gt;&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="101" name="Chapter_13.4ENG" tags="" position="6275,300" size="100,100">&lt;h1&gt;Chapter 13&lt;/h1&gt;
 &lt;&lt;run setup.setFace(&quot;indifferent&quot;)&gt;&gt;
 &lt;&lt;audio $music fadeoverto 2 0&gt;&gt;
-&lt;&lt;timed 2s&gt;&gt;&lt;&lt;goto &quot;Chapter_14ENG&quot;&gt;&gt;&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="102" name="START2" tags="" position="825,300" size="100,100">&lt;h1&gt;A few rules before we begin&lt;/h1&gt;&lt;h3&gt;This is an Audio Game. Please listen to it with &lt;strong&gt;headphones.&lt;/strong&gt;
+&lt;&lt;timed 2s&gt;&gt;&lt;&lt;goto &quot;Chapter_14ENG&quot;&gt;&gt;&lt;&lt;/timed&gt;&gt;</tw-passagedata><tw-passagedata pid="102" name="START2" tags="" position="800,300" size="100,100">&lt;h1&gt;A few rules before we begin&lt;/h1&gt;&lt;h4&gt;This is an Audio Game. Please listen to it with &lt;strong&gt;headphones.&lt;/strong&gt;
 
 There are audio files in all &lt;strong&gt;chapters&lt;/strong&gt; of the game. They play automatically.
 If for some reason you don&#39;t hear a file, tap the screen. Some browsers (especially on iOS) may block automatic audio playback.
@@ -1383,7 +1412,7 @@ If for some reason you don&#39;t hear a file, tap the screen. Some browsers (esp
 The game lasts  approximately 20 minutes.
 
 &lt;strong&gt;Approach the bonfire to begin.&lt;/strong&gt;
-When you ready, press the button&lt;/h3&gt;
+When you ready, press the button&lt;/h4&gt;
 &lt;span class=&quot;btn&quot;&gt;[[START-&gt;EnglishName]]&lt;/span&gt;</tw-passagedata></tw-storydata>
 	<script id="script-sugarcube" type="text/javascript">
 	/*! SugarCube JS */
