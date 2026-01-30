@@ -112,56 +112,43 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
 /* =========================
   H1
 ========================= */
-/* обычный h1 (как заголовок главы) */
-h1{
-  display: block;
-  margin: 24px auto 28px;
-  text-align: center;
+
+/* Включаем эффект ТОЛЬКО если есть --tw */
+h1[style*="--tw:"]{
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
 }
 
-/* анимация включается ТОЛЬКО если у h1 задан --tw */
+/* слой печати */
 h1[style*="--tw:"]{
-  width: max-content;         /* ширина = по тексту */
-  max-width: 92vw;            /* чтобы не вылезало на мобиле */
-  white-space: nowrap;
-  position: relative;
-
-  /* печать: НЕ через width, а через обрезку */
   clip-path: inset(0 100% 0 0);
-  animation: h1-reveal 1.8s steps(var(--tw), end) forwards;
+  animation: h1-type 1.6s steps(var(--tw), end) forwards;
 }
 
 /* курсор */
 h1[style*="--tw:"]::after{
   content: "";
   position: absolute;
-  top: 0.05em;
-  bottom: 0.05em;
+  top: 0.1em;
+  bottom: 0.1em;
   width: 2px;
   background: currentColor;
 
-  left: 0;
+  right: 0;
 
-  animation:
-    h1-caret-move 1.8s steps(var(--tw), end) forwards,
-    h1-caret-blink 0.9s step-end infinite;
+  animation: h1-caret-blink 0.9s step-end infinite;
 }
 
-@keyframes h1-reveal{
+@keyframes h1-type{
   from { clip-path: inset(0 100% 0 0); }
   to   { clip-path: inset(0 0 0 0); }
-}
-
-@keyframes h1-caret-move{
-  from { left: 0; }
-  to   { left: 100%; }
 }
 
 @keyframes h1-caret-blink{
   from, to { opacity: 0; }
   50%      { opacity: 1; }
 }
-
 
 
 /* =========================
