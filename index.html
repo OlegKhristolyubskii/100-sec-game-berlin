@@ -432,17 +432,13 @@ $(document).on(":storyready", function () {
     </div>
   `;
 
-  // Важно: #story уже существует в SugarCube
   $("#story").append(hudHTML);
 
-  // Инициализация значений, если их ещё нет
   if (State.variables.lives == null) State.variables.lives = setup.HUD.maxLives;
   if (State.variables.face == null) State.variables.face = "neutral";
 
   setup.updateHUD();
-});
-
- // NEW CODE!!! //
+  
   // Инициализируем фикс для autoplay после блокировки
   setup.initAutoplayFix();
 });
@@ -465,32 +461,29 @@ setup.initAutoplayFix = function () {
 
   // При любом взаимодействии после блокировки - "пробуждаем" аудио контекст
   const resumeAudioContext = function() {
-    if (State.temporary.needsAudioResume) {
-      const audio = SugarCube?.SimpleAudio;
-      if (!audio) return;
+    if (!State.temporary.needsAudioResume) return;
+    
+    const audio = SugarCube?.SimpleAudio;
+    if (!audio) return;
 
-      // Проигрываем тишину, чтобы разбудить AudioContext
-      // Это восстанавливает разрешение на autoplay
-      try {
-        // Пробуем возобновить все приостановленные треки
-        audio.tracks.forEach((track) => {
-          if (track.isPaused()) {
-            track.play().catch(() => {});
-          }
-        });
-        
-        // Если есть AudioContext напрямую - возобновляем его
-        const ctx = audio.context;
-        if (ctx && ctx.state === 'suspended') {
-          ctx.resume().then(() => {
-            console.log('AudioContext resumed');
-          });
+    try {
+      // Пробуем возобновить приостановленные треки
+      audio.tracks.forEach(function(track) {
+        if (track.isPaused && track.isPaused()) {
+          track.play().catch(function() {});
         }
-        
-        State.temporary.needsAudioResume = false;
-      } catch (e) {
-        console.log('Audio resume attempt:', e);
+      });
+      
+      // Если есть AudioContext напрямую - возобновляем его
+      if (audio.context && audio.context.state === 'suspended') {
+        audio.context.resume().then(function() {
+          console.log('AudioContext resumed');
+        });
       }
+      
+      State.temporary.needsAudioResume = false;
+    } catch (e) {
+      console.log('Audio resume attempt:', e);
     }
   };
 
@@ -500,18 +493,6 @@ setup.initAutoplayFix = function () {
   // Также пробуем при каждом переходе между пассажами
   $(document).on(":passagestart", resumeAudioContext);
 };
-
-
-
-
-
-
-
-
-
-
-
-// OLD CODE!!! //
 
 /* === Show HUD === */
 $(document).on(":passagedisplay", function () {
@@ -526,8 +507,7 @@ $(document).on(":passagedisplay", function () {
   setup.updateHUD();
 });
 
-/NEW CODE!!!/
-/*fadeout - с защитой от ошибок при блокировке*/
+/*fadeout*/
 window.fadeOutTrack = function (trackId, durationMs, onDone) {
   const audio = SugarCube?.SimpleAudio;
   if (!audio) {
@@ -546,48 +526,32 @@ window.fadeOutTrack = function (trackId, durationMs, onDone) {
   const stepTime = Math.max(16, Math.floor(durationMs / steps));
   let i = 0;
 
-  const timer = setInterval(() => {
+  const timer = setInterval(function() {
     i += 1;
     const t = i / steps;
     
     try {
-      // Проверяем, что трек всё ещё доступен
-      if (track.hasSource && track.hasSource()) {
-        track.volume(startVol * (1 - t));
-      } else {
-        // Трек недоступен - прерываем
+      track.volume(startVol * (1 - t));
+      
+      if (i >= steps) {
         clearInterval(timer);
+        track.stop();
+        track.volume(startVol);
         if (typeof onDone === "function") onDone();
-        return;
       }
     } catch (e) {
       // Если ошибка доступа к треку - завершаем
       clearInterval(timer);
       if (typeof onDone === "function") onDone();
-      return;
-    }
-
-    if (i >= steps) {
-      clearInterval(timer);
-      try {
-        track.stop();
-        track.volume(startVol);
-      } catch (e) {
-        console.log('Fadeout completion error:', e);
-      }
-      if (typeof onDone === "function") onDone();
     }
   }, stepTime);
 };
 
-/OLD CODE!!!/
 // жизни и лицо //
 /* === CONFIG === */
 setup.HUD = {
- // картинка одной жизни
-    lifeIcon:"images/life.png",
+  lifeIcon:"images/life.png",
 
-// лица (ключ -> путь)
   faces: {
     neutral:"images/face_neutral.png",
     happy:"images/face_happy.png",
@@ -598,12 +562,15 @@ setup.HUD = {
   },
 
   maxLives: 10,
-  gameOverPassage: "GameOverCut" // название пассажа проигрыша
+  gameOverPassage: "GameOverCut"
 };
 
-/* === Preload images (чтобы кэшировались заранее) === */
+/* === Preload images === */
 setup.preloadImages = function (urls) {
-  urls.forEach(url => { const img = new Image(); img.src = url; });
+  urls.forEach(function(url) { 
+    const img = new Image(); 
+    img.src = url; 
+  });
 };
 
 setup.preloadImages([
@@ -612,33 +579,36 @@ setup.preloadImages([
 ]);
 
 /* === Lives LOST === */
-setup.loseLife = function (n = 1) {
+setup.loseLife = function (n) {
+  if (typeof n === "undefined") n = 1;
   if (State.variables.lives == null) State.variables.lives = setup.HUD.maxLives;
 
   State.variables.lives = Math.max(0, State.variables.lives - n);
   setup.updateHUD();
 
   if (State.variables.lives <= 0) {
-    // важно: отложенный переход
-    setTimeout(() => Engine.play(setup.HUD.gameOverPassage), 0);
+    setTimeout(function() { 
+      Engine.play(setup.HUD.gameOverPassage); 
+    }, 0);
   }
 };
+
 /* === Lives ADD === */
 setup.addLife = function (n) {
-  if (typeof $lives !== "number") return;
-
-  $lives += n;
-
-  if ($lives < 0) $lives = 0;
+  if (State.variables.lives == null) return;
+  
+  State.variables.lives += n;
+  if (State.variables.lives < 0) State.variables.lives = 0;
+  
+  setup.updateHUD();
 };
-
 
 setup.resetLives = function () {
   State.variables.lives = setup.HUD.maxLives;
   setup.updateHUD();
 };
 
-/* === Face API (если хочешь управлять лицом переменной) === */
+/* === Face API === */
 setup.setFace = function (key) {
   State.variables.face = key;
   setup.updateHUD();
@@ -650,9 +620,8 @@ setup.updateHUD = function () {
   const faceEl  = document.getElementById("hud-face");
   if (!livesEl || !faceEl) return;
 
-  const lives = State.variables.lives ?? setup.HUD.maxLives;
+  const lives = State.variables.lives != null ? State.variables.lives : setup.HUD.maxLives;
 
-  // Рендер жизней как N картинок
   livesEl.innerHTML = "";
   for (let i = 0; i < lives; i++) {
     const img = document.createElement("img");
@@ -662,27 +631,19 @@ setup.updateHUD = function () {
     livesEl.appendChild(img);
   }
 
-  // Определяем, какое лицо показывать:
-  // 1) если у пассажа есть тег face-*, он сильнее переменной
   const p = Story.get(State.passage);
   let faceKey = State.variables.face || "neutral";
 
   if (p && p.tags) {
-    const tag = p.tags.find(t => t.startsWith("face-"));
+    const tag = p.tags.find(function(t) { 
+      return t.startsWith("face-"); 
+    });
     if (tag) faceKey = tag.replace("face-", "");
   }
 
   faceEl.src = setup.HUD.faces[faceKey] || setup.HUD.faces.neutral;
 };
 
-/* === Авто-обновление HUD при каждом показе пассажа === */
-$(document).on(":passagedisplay", function () {
-  // если вдруг переменных ещё нет
-  if (State.variables.lives == null) State.variables.lives = setup.HUD.maxLives;
-  if (State.variables.face == null)  State.variables.face = "neutral";
-
-  setup.updateHUD();
-});
 </script><tw-tag name="DE" color="green"></tw-tag><tw-tag name="ENG" color="blue"></tw-tag><tw-passagedata pid="1" name="START" tags="" position="600,300" size="100,100">&lt;h2&gt;It is 100 seconds to Midnight&lt;/h2&gt;&lt;h5&gt;by Anastasiia Nasonkina
 and Oleg Hristolübskiy&lt;/h5&gt;
 
