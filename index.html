@@ -133,7 +133,16 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
 /* =========================
    BASE / BACKGROUND
 ========================= */
-html, body { height: 100%; }
+html, body { 
+  height: 100%; 
+  /* ИСПРАВЛЕНИЕ 1: запрещаем прокрутку и отскок на мобильных */
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
 body{
   margin: 0;
   background: var(--win-bg);
@@ -146,10 +155,11 @@ html, body, #story{
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: auto;
   text-rendering: geometricPrecision;
-  strong, b {
+}
+
+strong, b {
   font-weight: 700;
   text-shadow: 0.6px 0 0 currentColor;
-}
 }
 
 /* чтобы контент не залезал под рамку */
@@ -158,6 +168,11 @@ html, body, #story{
   min-height: 100vh;
   padding: var(--frame-w);
   background: transparent;
+  /* ИСПРАВЛЕНИЕ 1: разрешаем прокрутку только внутри story */
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100vh;
+  position: relative;
 }
 
 /* рамка по всему экрану */
@@ -205,16 +220,24 @@ body::before{
     inset -1px -1px 0 var(--b-dark);
 
   cursor: default;
+  
+  /* ИСПРАВЛЕНИЕ 2: фиксируем позиционирование кнопок */
+  position: relative;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
+
 .btn a.link-internal:hover{
   background: #b8b8b8;
   color: #000;
 }
+
 .btn a.link-internal:active{
   box-shadow:
     inset -1px -1px 0 var(--b-lite),
     inset 1px 1px 0 var(--b-dark);
 }
+
 .btn a.link-internal:focus-visible{
   outline: 1px dotted #000;
   outline-offset: -4px;
@@ -245,24 +268,28 @@ body::before{
     inset -1px -1px 0 var(--b-dark);
 
   cursor: default;
+  
+  /* ИСПРАВЛЕНИЕ 2: фиксируем позиционирование кнопок */
+  position: relative;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
+
 .btn a:hover{
   background: #b8b8b8;
   color: #000;
 }
+
 .btn a:active{
   box-shadow:
     inset -1px -1px 0 var(--b-lite),
     inset 1px 1px 0 var(--b-dark);
 }
+
 .btn a:focus-visible{
   outline: 1px dotted #000;
   outline-offset: -4px;
 }
-
-
-
-
 
 /* =========================
    QUESTION WINDOW
@@ -303,6 +330,9 @@ body::before{
 
   padding: 44px 24px 22px;
   color: #000;
+  
+  /* ИСПРАВЛЕНИЕ 2: фиксация окна */
+  touch-action: manipulation;
 }
 
 /* на всякий: любые p/span и т.п. внутри окна тоже чёрные */
@@ -341,7 +371,6 @@ body::before{
 
   pointer-events: none;
 }
-
 
 /* =========================
    ANSWERS GRID
@@ -415,9 +444,7 @@ body::before{
   width: 56px;
   height: 56px;
   object-fit: contain;
-}
-
-</style><script role="script" id="twine-user-script" type="text/twine-javascript">/*HUD*/
+}</style><script role="script" id="twine-user-script" type="text/twine-javascript">/*HUD*/
 
 /* === Создаём HUD, не трогая StoryInterface === */
 $(document).on(":storyready", function () {
