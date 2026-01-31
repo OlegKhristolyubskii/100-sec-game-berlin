@@ -478,6 +478,47 @@ setup.initAudioContextResume = function () {
   });
 };
 
+/* === ФИКС для смены треков (обновление Media Session) === */
+$(document).on(':passagestart', function() {
+  // Даём время SugarCube обработать <<set $music>> и <<audio play>>
+  setTimeout(function() {
+    const audio = SugarCube && SugarCube.SimpleAudio;
+    if (!audio) return;
+
+    // Находим играющий трек
+    let playingTrack = null;
+    let playingTrackId = null;
+    
+    audio.tracks.forEach(function(track, id) {
+      if (track.isPlaying()) {
+        playingTrack = track;
+        playingTrackId = id;
+      }
+    });
+
+    // Если нашли играющий трек - обновляем Media Session
+    if (playingTrack && 'mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: playingTrackId || 'Audio Track',
+        artist: 'Game Audio',
+        album: 'Twine Game',
+        // можно добавить artwork если есть
+      });
+
+      // Обновляем обработчики для медиа-кнопок
+      navigator.mediaSession.setActionHandler('play', function() {
+        if (playingTrack) playingTrack.play();
+      });
+      
+      navigator.mediaSession.setActionHandler('pause', function() {
+        if (playingTrack) playingTrack.pause();
+      });
+
+      console.log('Media Session updated for:', playingTrackId);
+    }
+  }, 200); // задержка чтобы макросы успели отработать
+});
+
 /* === Show HUD === */
 $(document).on(":passagedisplay", function () {
   const show = State.variables.hudOn === true;
@@ -518,7 +559,6 @@ window.fadeOutTrack = function (trackId, durationMs, onDone) {
   let completed = false;
 
   const timer = setInterval(function() {
-    // Защита от повторного выполнения
     if (completed) {
       clearInterval(timer);
       return;
@@ -528,7 +568,6 @@ window.fadeOutTrack = function (trackId, durationMs, onDone) {
     const t = i / steps;
     
     try {
-      // Проверяем что трек всё ещё существует и доступен
       const currentTrack = audio.tracks.get(trackId);
       if (!currentTrack || !currentTrack.isPlaying()) {
         completed = true;
@@ -547,7 +586,6 @@ window.fadeOutTrack = function (trackId, durationMs, onDone) {
         if (typeof onDone === "function") onDone();
       }
     } catch (e) {
-      // При любой ошибке - завершаем
       completed = true;
       clearInterval(timer);
       console.log("fadeOut error:", e);
