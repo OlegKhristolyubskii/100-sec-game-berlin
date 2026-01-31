@@ -439,86 +439,92 @@ $(document).on(":storyready", function () {
 
   setup.updateHUD();
   
-  // Инициализируем агрессивную разблокировку
-  setup.initAggressiveAudioUnlock();
+  // Инициализируем фикс
+  setup.initAudioRecovery();
 });
 
-/* === АГРЕССИВНАЯ РАЗБЛОКИРОВКА AUDIO === */
-setup.initAggressiveAudioUnlock = function () {
+/* === ВОССТАНОВЛЕНИЕ АУДИО ПОСЛЕ БЛОКИРОВКИ === */
+setup.initAudioRecovery = function () {
   const audio = SugarCube && SugarCube.SimpleAudio;
   if (!audio || !audio.context) return;
 
-  const ctx = audio.context;
+  let wasLocked = false;
 
-  // Функция принудительного возобновления
-  function forceResumeContext() {
+  // Отслеживаем блокировку
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      wasLocked = true;
+      console.log('Screen locked');
+    } else if (wasLocked) {
+      console.log('Screen unlocked - will recover on next interaction');
+      State.temporary.needsAudioRecovery = true;
+    }
+  });
+
+  // Функция восстановления
+  function recoverAudio() {
+    if (!State.temporary.needsAudioRecovery) return;
+    
+    console.log('=== Starting audio recovery ===');
+    const ctx = audio.context;
+    
+    // 1. Возобновляем контекст
     if (ctx.state === 'suspended') {
-      console.log('AudioContext suspended, attempting resume...');
+      console.log('Resuming suspended AudioContext...');
       ctx.resume().then(function() {
         console.log('AudioContext resumed successfully');
       }).catch(function(err) {
-        console.error('AudioContext resume failed:', err);
+        console.error('Failed to resume AudioContext:', err);
       });
+    } else {
+      console.log('AudioContext state:', ctx.state);
     }
+    
+    // 2. Очищаем битые fade-таймеры у всех треков
+    var trackIds = [];
+    if (audio.tracks && audio.tracks._map) {
+      for (var id in audio.tracks._map) {
+        trackIds.push(id);
+      }
+    }
+    
+    console.log('Found tracks:', trackIds);
+    
+    trackIds.forEach(function(id) {
+      var track = audio.tracks.get(id);
+      if (track) {
+        try {
+          var isPlaying = track.isPlaying();
+          console.log('Track', id, '- playing:', isPlaying);
+          
+          // Очищаем fade-таймер у всех треков (даже играющих)
+          if (track._fade) {
+            clearTimeout(track._fade);
+            track._fade = null;
+            console.log('Cleared fade timer for', id);
+          }
+          
+          // Только неиграющие треки - сбрасываем полностью
+          if (!isPlaying) {
+            track.stop();
+          }
+        } catch (e) {
+          console.error('Error processing track:', id, e);
+        }
+      }
+    });
+    
+    State.temporary.needsAudioRecovery = false;
+    wasLocked = false;
+    console.log('=== Audio recovery complete ===');
   }
 
-  // При любом взаимодействии
-  document.addEventListener('click', forceResumeContext, true);
-  document.addEventListener('touchstart', forceResumeContext, true);
-  document.addEventListener('touchend', forceResumeContext, true);
+  // Восстанавливаем при первом взаимодействии после разблокировки
+  document.addEventListener('click', recoverAudio, true);
+  document.addEventListener('touchstart', recoverAudio, true);
   
-  // При разблокировке экрана
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-      setTimeout(forceResumeContext, 100);
-    }
-  });
-
-  // Перед каждым пассажем
-  $(document).on(':passagestart', function() {
-    forceResumeContext();
-  });
-
-  // После каждого пассажа
-  $(document).on(':passagerender', function() {
-    setTimeout(forceResumeContext, 50);
-  });
-
-  // КРИТИЧНО: Перехватываем метод play() у всех треков
-  // и проверяем контекст перед каждым воспроизведением
-  const originalLoad = SimpleAudio.prototype.load;
-  SimpleAudio.prototype.load = function() {
-    const track = originalLoad.apply(this, arguments);
-    
-    // Сохраняем оригинальный метод play
-    if (!track._originalPlay) {
-      track._originalPlay = track.play;
-      
-      // Заменяем на версию с проверкой контекста
-      track.play = function() {
-        const self = this;
-        const args = arguments;
-        
-        // Проверяем и возобновляем контекст перед воспроизведением
-        if (ctx.state === 'suspended') {
-          console.log('Context suspended before play, resuming...');
-          return ctx.resume().then(function() {
-            console.log('Context resumed, now playing');
-            return self._originalPlay.apply(self, args);
-          }).catch(function(err) {
-            console.error('Failed to resume before play:', err);
-            return self._originalPlay.apply(self, args);
-          });
-        } else {
-          return self._originalPlay.apply(self, args);
-        }
-      };
-    }
-    
-    return track;
-  };
-
-  console.log('Aggressive audio unlock initialized');
+  // Также при начале каждого пассажа
+  $(document).on(':passagestart', recoverAudio);
 };
 
 /* === Show HUD === */
@@ -534,7 +540,7 @@ $(document).on(":passagedisplay", function () {
   setup.updateHUD();
 });
 
-/*fadeout - исправленная версия*/
+/*fadeout - с проверкой контекста*/
 window.fadeOutTrack = function (trackId, durationMs, onDone) {
   const audio = SugarCube && SugarCube.SimpleAudio;
   if (!audio) {
@@ -544,15 +550,27 @@ window.fadeOutTrack = function (trackId, durationMs, onDone) {
 
   const track = audio.tracks.get(trackId);
   if (!track) {
+    console.log('fadeOut: track not found:', trackId);
+    if (typeof onDone === "function") onDone();
+    return;
+  }
+
+  // Проверяем контекст перед началом fade
+  if (audio.context && audio.context.state === 'suspended') {
+    console.log('fadeOut: context suspended, stopping immediately');
+    track.stop();
     if (typeof onDone === "function") onDone();
     return;
   }
 
   if (!track.isPlaying()) {
+    console.log('fadeOut: track not playing:', trackId);
     if (typeof onDone === "function") onDone();
     return;
   }
 
+  console.log('fadeOut: starting fade for', trackId, 'duration', durationMs);
+  
   const startVol = track.volume();
   const steps = 20;
   const stepTime = Math.max(16, Math.floor(durationMs / steps));
@@ -571,8 +589,19 @@ window.fadeOutTrack = function (trackId, durationMs, onDone) {
     try {
       const currentTrack = audio.tracks.get(trackId);
       if (!currentTrack || !currentTrack.isPlaying()) {
+        console.log('fadeOut: track stopped mid-fade');
         completed = true;
         clearInterval(timer);
+        if (typeof onDone === "function") onDone();
+        return;
+      }
+
+      // Проверяем контекст на каждом шаге
+      if (audio.context && audio.context.state === 'suspended') {
+        console.log('fadeOut: context suspended mid-fade, aborting');
+        completed = true;
+        clearInterval(timer);
+        currentTrack.stop();
         if (typeof onDone === "function") onDone();
         return;
       }
@@ -580,6 +609,7 @@ window.fadeOutTrack = function (trackId, durationMs, onDone) {
       currentTrack.volume(startVol * (1 - t));
       
       if (i >= steps) {
+        console.log('fadeOut: complete for', trackId);
         completed = true;
         clearInterval(timer);
         currentTrack.stop();
@@ -587,9 +617,9 @@ window.fadeOutTrack = function (trackId, durationMs, onDone) {
         if (typeof onDone === "function") onDone();
       }
     } catch (e) {
+      console.error('fadeOut: error', e);
       completed = true;
       clearInterval(timer);
-      console.log("fadeOut error:", e);
       if (typeof onDone === "function") onDone();
     }
   }, stepTime);
