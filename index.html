@@ -133,319 +133,6 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
 /* =========================
    BASE / BACKGROUND
 ========================= */
-html, body { height: 100%; }
-body{
-  margin: 0;
-  background: var(--win-bg);
-}
-
-/* общий шрифт */
-html, body, #story{
-  font-family: Tahoma, Verdana, Geneva, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  font-size: 16px;
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: auto;
-  text-rendering: geometricPrecision;
-  strong, b {
-  font-weight: 700;
-  text-shadow: 0.6px 0 0 currentColor;
-}
-}
-
-/* чтобы контент не залезал под рамку */
-#story{
-  box-sizing: border-box;
-  min-height: 100vh;
-  padding: var(--frame-w);
-  background: transparent;
-}
-
-/* рамка по всему экрану */
-body::before{
-  content: "";
-  position: fixed;
-  top:    env(safe-area-inset-top, 0px);
-  right:  env(safe-area-inset-right, 0px);
-  bottom: env(safe-area-inset-bottom, 0px);
-  left:   env(safe-area-inset-left, 0px);
-
-  border: var(--frame-w) solid var(--frame-mid);
-  box-shadow:
-    inset 0 0 0 1px var(--frame-lite),
-    inset 0 0 0 3px var(--frame-dark);
-
-  pointer-events: none;
-  z-index: 999999;
-}
-
-/* =========================
-   BUTTONS (Win95)
-========================= */
-.btn a.link-internal{
-  display: inline-block;
-  min-width: 120px;
-  padding: 10px 22px;
-
-  background: var(--win-gray);
-  color: #000;
-
-  border: 1px solid var(--b-mid);
-  border-radius: 0;
-
-  font: inherit;
-  font-size: 15px;
-  font-weight: 400;
-
-  text-decoration: none;
-  letter-spacing: 0;
-  text-transform: none;
-
-  box-shadow:
-    inset 1px 1px 0 var(--b-lite),
-    inset -1px -1px 0 var(--b-dark);
-
-  cursor: default;
-}
-.btn a.link-internal:hover{
-  background: #b8b8b8;
-  color: #000;
-}
-.btn a.link-internal:active{
-  box-shadow:
-    inset -1px -1px 0 var(--b-lite),
-    inset 1px 1px 0 var(--b-dark);
-}
-.btn a.link-internal:focus-visible{
-  outline: 1px dotted #000;
-  outline-offset: -4px;
-}
-
-/* добавляем то же для внешних */
-.btn a{
-  display: inline-block;
-  min-width: 120px;
-  padding: 10px 22px;
-
-  background: var(--win-gray);
-  color: #000;
-
-  border: 1px solid var(--b-mid);
-  border-radius: 0;
-
-  font: inherit;
-  font-size: 15px;
-  font-weight: 400;
-
-  text-decoration: none;
-  letter-spacing: 0;
-  text-transform: none;
-
-  box-shadow:
-    inset 1px 1px 0 var(--b-lite),
-    inset -1px -1px 0 var(--b-dark);
-
-  cursor: default;
-}
-.btn a:hover{
-  background: #b8b8b8;
-  color: #000;
-}
-.btn a:active{
-  box-shadow:
-    inset -1px -1px 0 var(--b-lite),
-    inset 1px 1px 0 var(--b-dark);
-}
-.btn a:focus-visible{
-  outline: 1px dotted #000;
-  outline-offset: -4px;
-}
-
-
-
-
-
-/* =========================
-   QUESTION WINDOW
-========================= */
-.qwin{
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 999998;
-
-  width: min(
-    560px,
-    calc(
-      100vw
-      - (var(--screen-pad) * 2)
-      - env(safe-area-inset-left, 0px)
-      - env(safe-area-inset-right, 0px)
-    )
-  );
-
-  max-height: calc(
-    100vh
-    - (var(--screen-pad) * 2)
-    - env(safe-area-inset-top, 0px)
-    - env(safe-area-inset-bottom, 0px)
-  );
-
-  overflow: auto;
-  box-sizing: border-box;
-
-  background: var(--win-gray);
-
-  border: 2px solid var(--b-mid);
-  box-shadow:
-    inset 1px 1px 0 var(--b-lite),
-    inset -1px -1px 0 var(--b-dark);
-
-  padding: 44px 24px 22px;
-  color: #000;
-}
-
-/* на всякий: любые p/span и т.п. внутри окна тоже чёрные */
-.qwin *{ color: inherit; }
-
-/* синяя полоса */
-.qwin::before{
-  content:"";
-  position: absolute;
-  left: 0; right: 0; top: 0;
-  height: 28px;
-  background: var(--win-blue);
-}
-
-/* декоративный крестик */
-.qwin::after{
-  content:"×";
-  position: absolute;
-  top: 5px;
-  right: 6px;
-
-  width: 18px;
-  height: 18px;
-  line-height: 18px;
-  text-align: center;
-
-  background: var(--win-gray);
-  color: #000;
-  font-size: 14px;
-  font-weight: 700;
-
-  border: 1px solid var(--b-mid);
-  box-shadow:
-    inset 1px 1px 0 var(--b-lite),
-    inset -1px -1px 0 var(--b-dark);
-
-  pointer-events: none;
-}
-
-
-/* =========================
-   ANSWERS GRID
-========================= */
-.answer-grid{
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 18px;
-
-  align-items: stretch;
-  justify-items: stretch;
-}
-
-.answer-grid .btn{ width: 100%; }
-
-.answer-grid .btn a.link-internal{
-  width: 100%;
-  min-height: 62px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  text-align: center;
-  box-sizing: border-box;
-  padding: 10px 14px;
-}
-
-/* мобила: одна колонка */
-@media (max-width: 420px){
-  .answer-grid{ grid-template-columns: 1fr; }
-}
-
-/* =========================
-   LIVES (остаётся отдельно)
-========================= */
-#hud-lives-wrap{
-  position: fixed;
-  top: 30px;
-  right: 30px;
-  z-index: 9999;
-  pointer-events: none;
-}
-
-#hud-lives{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  justify-content: flex-end;
-  max-width: 220px;
-}
-
-.life-icon{
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
-/* =========================
-   ЛИЦО (остаётся отдельно)
-========================= */
-#hud-face-wrap{
-  position: fixed;
-  top: 12px;
-  left: 12px;
-  z-index: 9999;
-  pointer-events: none;
-}
-
-#hud-face{
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
-}
-
-</style><script role="script" id="twine-user-script" type="text/twine-javascript">/* =========================
-   UIBAR
-========================= */
-#ui-bar { display: none; }
-
-/* =========================
-   VARIABLES
-========================= */
-:root{
-  --win-bg:   #008081;   /* фон */
-  --win-gray: #c0c0c0;
-  --win-blue: #000080;
-
-  --b-dark: #404040;
-  --b-mid:  #808080;
-  --b-lite: #ffffff;
-
-  --frame-w: clamp(6px, 1.2vw, 14px);
-
-  --frame-mid:  #9ea4a7;
-  --frame-lite: #d7dbde;
-  --frame-dark: #5f666a;
-  
-  --screen-pad: clamp(12px, 4vw, 24px);
-}
-
-/* =========================
-   BASE / BACKGROUND
-========================= */
 html, body { 
   height: 100%; 
   /* ИСПРАВЛЕНИЕ 1: запрещаем прокрутку и отскок на мобильных */
@@ -755,7 +442,181 @@ body::before{
   width: 56px;
   height: 56px;
   object-fit: contain;
-}</script><tw-tag name="DE" color="green"></tw-tag><tw-tag name="ENG" color="blue"></tw-tag><tw-passagedata pid="1" name="START" tags="" position="600,300" size="100,100">&lt;h2&gt;It is 100 seconds to Midnight&lt;/h2&gt;&lt;h5&gt;by Anastasiia Nasonkina and Oleg Hristolübskiy&lt;/h5&gt;&lt;h6&gt;work-and-progress version for Vorspiel 2026&lt;/h6&gt;
+}</style><script role="script" id="twine-user-script" type="text/twine-javascript">/*HUD*/
+
+/* === Создаём HUD, не трогая StoryInterface === */
+$(document).on(":storyready", function () {
+  if (document.getElementById("hud")) return;
+
+  const hudHTML = `
+    <div id="hud-face-wrap">
+      <img id="hud-face" alt="face">
+    </div>
+    <div id="hud-lives-wrap">
+      <div id="hud-lives" aria-label="lives"></div>
+    </div>
+  `;
+
+  // Важно: #story уже существует в SugarCube
+  $("#story").append(hudHTML);
+
+  // Инициализация значений, если их ещё нет
+  if (State.variables.lives == null) State.variables.lives = setup.HUD.maxLives;
+  if (State.variables.face == null) State.variables.face = "neutral";
+
+  setup.updateHUD();
+});
+
+/* === Show HUD === */
+$(document).on(":passagedisplay", function () {
+  const show = State.variables.hudOn === true;
+
+  const face = document.getElementById("hud-face-wrap");
+  const lives = document.getElementById("hud-lives-wrap");
+
+  if (face)  face.style.display  = show ? "block" : "none";
+  if (lives) lives.style.display = show ? "block" : "none";
+
+  setup.updateHUD();
+});
+
+/*fadeout*/
+window.fadeOutTrack = function (trackId, durationMs, onDone) {
+	// SimpleAudio API (SugarCube)
+	const audio = SugarCube?.SimpleAudio;
+	if (!audio) {
+		// если вдруг нет SimpleAudio — просто коллбек
+		if (typeof onDone === "function") onDone();
+		return;
+	}
+
+	const track = audio.tracks.get(trackId);
+	if (!track) {
+		if (typeof onDone === "function") onDone();
+		return;
+	}
+
+	const startVol = track.volume();
+	const steps = 20;
+	const stepTime = Math.max(16, Math.floor(durationMs / steps));
+	let i = 0;
+
+	const timer = setInterval(() => {
+		i += 1;
+		const t = i / steps;
+		track.volume(startVol * (1 - t));
+
+		if (i >= steps) {
+			clearInterval(timer);
+			track.stop();
+			track.volume(startVol); // вернём громкость на будущее
+			if (typeof onDone === "function") onDone();
+		}
+	}, stepTime);
+};
+
+// жизни и лицо //
+/* === CONFIG === */
+setup.HUD = {
+ // картинка одной жизни
+    lifeIcon:"images/life.png",
+
+// лица (ключ -> путь)
+  faces: {
+    neutral:"images/face_neutral.png",
+    happy:"images/face_happy.png",
+    sad:"images/face_sad.png",
+    win:"images/face_win.png",
+    cry:"images/face_cry.png",
+    indifferent:"images/face_indifferent.png",
+  },
+
+  maxLives: 10,
+  gameOverPassage: "GameOverCut" // название пассажа проигрыша
+};
+
+/* === Preload images (чтобы кэшировались заранее) === */
+setup.preloadImages = function (urls) {
+  urls.forEach(url => { const img = new Image(); img.src = url; });
+};
+
+setup.preloadImages([
+  setup.HUD.lifeIcon,
+  ...Object.values(setup.HUD.faces)
+]);
+
+/* === Lives LOST === */
+setup.loseLife = function (n = 1) {
+  if (State.variables.lives == null) State.variables.lives = setup.HUD.maxLives;
+
+  State.variables.lives = Math.max(0, State.variables.lives - n);
+  setup.updateHUD();
+
+  if (State.variables.lives <= 0) {
+    // важно: отложенный переход
+    setTimeout(() => Engine.play(setup.HUD.gameOverPassage), 0);
+  }
+};
+/* === Lives ADD === */
+setup.addLife = function (n) {
+  if (typeof $lives !== "number") return;
+
+  $lives += n;
+
+  if ($lives < 0) $lives = 0;
+};
+
+
+setup.resetLives = function () {
+  State.variables.lives = setup.HUD.maxLives;
+  setup.updateHUD();
+};
+
+/* === Face API (если хочешь управлять лицом переменной) === */
+setup.setFace = function (key) {
+  State.variables.face = key;
+  setup.updateHUD();
+};
+
+/* === Render HUD === */
+setup.updateHUD = function () {
+  const livesEl = document.getElementById("hud-lives");
+  const faceEl  = document.getElementById("hud-face");
+  if (!livesEl || !faceEl) return;
+
+  const lives = State.variables.lives ?? setup.HUD.maxLives;
+
+  // Рендер жизней как N картинок
+  livesEl.innerHTML = "";
+  for (let i = 0; i < lives; i++) {
+    const img = document.createElement("img");
+    img.src = setup.HUD.lifeIcon;
+    img.className = "life-icon";
+    img.alt = "life";
+    livesEl.appendChild(img);
+  }
+
+  // Определяем, какое лицо показывать:
+  // 1) если у пассажа есть тег face-*, он сильнее переменной
+  const p = Story.get(State.passage);
+  let faceKey = State.variables.face || "neutral";
+
+  if (p && p.tags) {
+    const tag = p.tags.find(t => t.startsWith("face-"));
+    if (tag) faceKey = tag.replace("face-", "");
+  }
+
+  faceEl.src = setup.HUD.faces[faceKey] || setup.HUD.faces.neutral;
+};
+
+/* === Авто-обновление HUD при каждом показе пассажа === */
+$(document).on(":passagedisplay", function () {
+  // если вдруг переменных ещё нет
+  if (State.variables.lives == null) State.variables.lives = setup.HUD.maxLives;
+  if (State.variables.face == null)  State.variables.face = "neutral";
+
+  setup.updateHUD();
+});</script><tw-tag name="DE" color="green"></tw-tag><tw-tag name="ENG" color="blue"></tw-tag><tw-passagedata pid="1" name="START" tags="" position="600,300" size="100,100">&lt;h2&gt;It is 100 seconds to Midnight&lt;/h2&gt;&lt;h5&gt;by Anastasiia Nasonkina and Oleg Hristolübskiy&lt;/h5&gt;&lt;h6&gt;work-and-progress version for Vorspiel 2026&lt;/h6&gt;
 
 &lt;span class=&quot;btn&quot;&gt;[[START-&gt;START2]]&lt;/span&gt;</tw-passagedata><tw-passagedata pid="2" name="AUDIO" tags="" position="100,850" size="100,100">&lt;&lt;audio &quot;testTrack&quot; play loop&gt;&gt;
 
