@@ -439,71 +439,86 @@ $(document).on(":storyready", function () {
 
   setup.updateHUD();
   
-  // Инициализируем фикс автовоспроизведения
-  setup.initAutoplayUnlock();
+  // Инициализируем агрессивную разблокировку
+  setup.initAggressiveAudioUnlock();
 });
 
-/* === РАЗБЛОКИРОВКА AUTOPLAY ПОСЛЕ БЛОКИРОВКИ === */
-setup.initAutoplayUnlock = function () {
+/* === АГРЕССИВНАЯ РАЗБЛОКИРОВКА AUDIO === */
+setup.initAggressiveAudioUnlock = function () {
   const audio = SugarCube && SugarCube.SimpleAudio;
-  if (!audio) return;
+  if (!audio || !audio.context) return;
 
-  let audioLocked = false;
+  const ctx = audio.context;
 
-  // Отслеживаем блокировку экрана
-  document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-      audioLocked = true;
-      console.log('Screen locked - audio needs unlock');
-    }
-  });
-
-  // Создаём беззвучный буфер для разблокировки
-  function unlockAudioWithSilence() {
-    if (!audioLocked) return;
-    
-    try {
-      // Создаём очень короткий беззвучный звук
-      const ctx = audio.context;
-      if (!ctx) return;
-
-      // Возобновляем контекст
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
-
-      // Создаём и проигрываем тишину
-      const buffer = ctx.createBuffer(1, 1, 22050);
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      source.connect(ctx.destination);
-      source.start(0);
-
-      console.log('Audio unlocked with silence trick');
-      audioLocked = false;
-    } catch (e) {
-      console.log('Unlock attempt failed:', e);
+  // Функция принудительного возобновления
+  function forceResumeContext() {
+    if (ctx.state === 'suspended') {
+      console.log('AudioContext suspended, attempting resume...');
+      ctx.resume().then(function() {
+        console.log('AudioContext resumed successfully');
+      }).catch(function(err) {
+        console.error('AudioContext resume failed:', err);
+      });
     }
   }
 
-  // При ЛЮБОМ взаимодействии после блокировки - разблокируем
-  $(document).on('click touchstart mousedown keydown', function(e) {
-    if (audioLocked) {
-      unlockAudioWithSilence();
+  // При любом взаимодействии
+  document.addEventListener('click', forceResumeContext, true);
+  document.addEventListener('touchstart', forceResumeContext, true);
+  document.addEventListener('touchend', forceResumeContext, true);
+  
+  // При разблокировке экрана
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      setTimeout(forceResumeContext, 100);
     }
   });
 
-  // Также пробуем разблокировать при каждом переходе
+  // Перед каждым пассажем
   $(document).on(':passagestart', function() {
-    if (audioLocked) {
-      // Если аудио всё ещё заблокировано при переходе - 
-      // значит жест не сработал, но мы попробуем снова
-      const ctx = audio.context;
-      if (ctx && ctx.state === 'suspended') {
-        ctx.resume().catch(function() {});
-      }
-    }
+    forceResumeContext();
   });
+
+  // После каждого пассажа
+  $(document).on(':passagerender', function() {
+    setTimeout(forceResumeContext, 50);
+  });
+
+  // КРИТИЧНО: Перехватываем метод play() у всех треков
+  // и проверяем контекст перед каждым воспроизведением
+  const originalLoad = SimpleAudio.prototype.load;
+  SimpleAudio.prototype.load = function() {
+    const track = originalLoad.apply(this, arguments);
+    
+    // Сохраняем оригинальный метод play
+    if (!track._originalPlay) {
+      track._originalPlay = track.play;
+      
+      // Заменяем на версию с проверкой контекста
+      track.play = function() {
+        const self = this;
+        const args = arguments;
+        
+        // Проверяем и возобновляем контекст перед воспроизведением
+        if (ctx.state === 'suspended') {
+          console.log('Context suspended before play, resuming...');
+          return ctx.resume().then(function() {
+            console.log('Context resumed, now playing');
+            return self._originalPlay.apply(self, args);
+          }).catch(function(err) {
+            console.error('Failed to resume before play:', err);
+            return self._originalPlay.apply(self, args);
+          });
+        } else {
+          return self._originalPlay.apply(self, args);
+        }
+      };
+    }
+    
+    return track;
+  };
+
+  console.log('Aggressive audio unlock initialized');
 };
 
 /* === Show HUD === */
