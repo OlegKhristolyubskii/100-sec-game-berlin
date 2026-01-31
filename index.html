@@ -439,59 +439,43 @@ $(document).on(":storyready", function () {
 
   setup.updateHUD();
   
-  // Инициализируем фикс для autoplay после блокировки
-  setup.initAutoplayFix();
+  // Инициализируем фикс AudioContext
+  setup.initAudioContextResume();
 });
 
-/* === ФИКС AUTOPLAY ПОСЛЕ БЛОКИРОВКИ === */
-setup.initAutoplayFix = function () {
-  const audio = SugarCube?.SimpleAudio;
+/* === ФИКС AudioContext после блокировки === */
+setup.initAudioContextResume = function () {
+  const audio = SugarCube && SugarCube.SimpleAudio;
   if (!audio) return;
 
-  // Флаг, что нужно возобновить autoplay разрешение
-  State.temporary.needsAudioResume = false;
+  // Функция возобновления AudioContext
+  function resumeAudioContext() {
+    if (audio.context && audio.context.state === 'suspended') {
+      audio.context.resume().then(function() {
+        console.log('AudioContext resumed');
+      }).catch(function(err) {
+        console.log('AudioContext resume failed:', err);
+      });
+    }
+  }
 
-  // Отслеживаем блокировку экрана
-  document.addEventListener("visibilitychange", function () {
-    if (document.hidden) {
-      // Экран заблокирован - запоминаем, что потребуется новый жест
-      State.temporary.needsAudioResume = true;
+  // Возобновляем при разблокировке экрана
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      // Экран разблокирован - пробуем возобновить контекст
+      setTimeout(resumeAudioContext, 100);
     }
   });
 
-  // При любом взаимодействии после блокировки - "пробуждаем" аудио контекст
-  const resumeAudioContext = function() {
-    if (!State.temporary.needsAudioResume) return;
-    
-    const audio = SugarCube?.SimpleAudio;
-    if (!audio) return;
+  // Возобновляем перед каждым показом пассажа
+  $(document).on(':passagestart', function() {
+    resumeAudioContext();
+  });
 
-    try {
-      // Пробуем возобновить приостановленные треки
-      audio.tracks.forEach(function(track) {
-        if (track.isPaused && track.isPaused()) {
-          track.play().catch(function() {});
-        }
-      });
-      
-      // Если есть AudioContext напрямую - возобновляем его
-      if (audio.context && audio.context.state === 'suspended') {
-        audio.context.resume().then(function() {
-          console.log('AudioContext resumed');
-        });
-      }
-      
-      State.temporary.needsAudioResume = false;
-    } catch (e) {
-      console.log('Audio resume attempt:', e);
-    }
-  };
-
-  // Слушаем первый тап/клик после разблокировки
-  $(document).on("click touchstart", resumeAudioContext);
-  
-  // Также пробуем при каждом переходе между пассажами
-  $(document).on(":passagestart", resumeAudioContext);
+  // Возобновляем при первом взаимодействии (на всякий случай)
+  $(document).one('click touchstart', function() {
+    resumeAudioContext();
+  });
 };
 
 /* === Show HUD === */
@@ -507,9 +491,9 @@ $(document).on(":passagedisplay", function () {
   setup.updateHUD();
 });
 
-/*fadeout*/
+/*fadeout - исправленная версия*/
 window.fadeOutTrack = function (trackId, durationMs, onDone) {
-  const audio = SugarCube?.SimpleAudio;
+  const audio = SugarCube && SugarCube.SimpleAudio;
   if (!audio) {
     if (typeof onDone === "function") onDone();
     return;
@@ -521,27 +505,52 @@ window.fadeOutTrack = function (trackId, durationMs, onDone) {
     return;
   }
 
+  // Проверяем что трек вообще играет
+  if (!track.isPlaying()) {
+    if (typeof onDone === "function") onDone();
+    return;
+  }
+
   const startVol = track.volume();
   const steps = 20;
   const stepTime = Math.max(16, Math.floor(durationMs / steps));
   let i = 0;
+  let completed = false;
 
   const timer = setInterval(function() {
+    // Защита от повторного выполнения
+    if (completed) {
+      clearInterval(timer);
+      return;
+    }
+
     i += 1;
     const t = i / steps;
     
     try {
-      track.volume(startVol * (1 - t));
+      // Проверяем что трек всё ещё существует и доступен
+      const currentTrack = audio.tracks.get(trackId);
+      if (!currentTrack || !currentTrack.isPlaying()) {
+        completed = true;
+        clearInterval(timer);
+        if (typeof onDone === "function") onDone();
+        return;
+      }
+
+      currentTrack.volume(startVol * (1 - t));
       
       if (i >= steps) {
+        completed = true;
         clearInterval(timer);
-        track.stop();
-        track.volume(startVol);
+        currentTrack.stop();
+        currentTrack.volume(startVol);
         if (typeof onDone === "function") onDone();
       }
     } catch (e) {
-      // Если ошибка доступа к треку - завершаем
+      // При любой ошибке - завершаем
+      completed = true;
       clearInterval(timer);
+      console.log("fadeOut error:", e);
       if (typeof onDone === "function") onDone();
     }
   }, stepTime);
@@ -644,7 +653,13 @@ setup.updateHUD = function () {
   faceEl.src = setup.HUD.faces[faceKey] || setup.HUD.faces.neutral;
 };
 
-</script><tw-tag name="DE" color="green"></tw-tag><tw-tag name="ENG" color="blue"></tw-tag><tw-passagedata pid="1" name="START" tags="" position="600,300" size="100,100">&lt;h2&gt;It is 100 seconds to Midnight&lt;/h2&gt;&lt;h5&gt;by Anastasiia Nasonkina
+/* === Авто-обновление HUD === */
+$(document).on(":passagedisplay", function () {
+  if (State.variables.lives == null) State.variables.lives = setup.HUD.maxLives;
+  if (State.variables.face == null)  State.variables.face = "neutral";
+
+  setup.updateHUD();
+});</script><tw-tag name="DE" color="green"></tw-tag><tw-tag name="ENG" color="blue"></tw-tag><tw-passagedata pid="1" name="START" tags="" position="600,300" size="100,100">&lt;h2&gt;It is 100 seconds to Midnight&lt;/h2&gt;&lt;h5&gt;by Anastasiia Nasonkina
 and Oleg Hristolübskiy&lt;/h5&gt;
 
 &lt;span class=&quot;btn&quot;&gt;[[START-&gt;START2]]&lt;/span&gt;</tw-passagedata><tw-passagedata pid="2" name="AUDIO" tags="" position="100,850" size="100,100">&lt;&lt;audio &quot;testTrack&quot; play loop&gt;&gt;
@@ -727,7 +742,7 @@ Wie heißt du?
 &lt;&lt;textbox &quot;$playerName&quot; &quot;&quot;&gt;&gt;
 
 &lt;span class=&quot;btn&quot;&gt;[[WEITER-&gt;Chapter_0DE]]&lt;/span&gt;
-&lt;/div&gt;</tw-passagedata><tw-passagedata pid="16" name="Chapter_0ENG" tags="ENG" position="1150,300" size="100,100">&lt;h2 style=&quot;--tw: 9;&quot;&gt;Chapter 0&lt;/h2&gt;
+&lt;/div&gt;</tw-passagedata><tw-passagedata pid="16" name="Chapter_0ENG" tags="ENG" position="1150,300" size="100,100">&lt;h2&gt;Chapter 0&lt;/h2&gt;
 &lt;&lt;set $hudOn = true&gt;&gt;
 &lt;&lt;run setup.setFace(&quot;neutral&quot;)&gt;&gt;
 &lt;&lt;set $music = &quot;Ch0ENG&quot;&gt;&gt;
