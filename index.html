@@ -462,7 +462,6 @@ setup.initAudioContextResume = function () {
   // Возобновляем при разблокировке экрана
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
-      // Экран разблокирован - пробуем возобновить контекст
       setTimeout(resumeAudioContext, 100);
     }
   });
@@ -472,7 +471,7 @@ setup.initAudioContextResume = function () {
     resumeAudioContext();
   });
 
-  // Возобновляем при первом взаимодействии (на всякий случай)
+  // Возобновляем при первом взаимодействии
   $(document).one('click touchstart', function() {
     resumeAudioContext();
   });
@@ -480,43 +479,46 @@ setup.initAudioContextResume = function () {
 
 /* === ФИКС для смены треков (обновление Media Session) === */
 $(document).on(':passagestart', function() {
-  // Даём время SugarCube обработать <<set $music>> и <<audio play>>
   setTimeout(function() {
     const audio = SugarCube && SugarCube.SimpleAudio;
-    if (!audio) return;
+    if (!audio || !audio.tracks) return;
 
-    // Находим играющий трек
+    // Находим играющий трек через tracks.get() и проверку каждого известного ID
     let playingTrack = null;
     let playingTrackId = null;
     
-    audio.tracks.forEach(function(track, id) {
-      if (track.isPlaying()) {
+    // Пробуем найти трек через переменную $music если она есть
+    if (State.variables.music) {
+      const track = audio.tracks.get(State.variables.music);
+      if (track && track.isPlaying()) {
         playingTrack = track;
-        playingTrackId = id;
+        playingTrackId = State.variables.music;
       }
-    });
+    }
 
     // Если нашли играющий трек - обновляем Media Session
     if (playingTrack && 'mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: playingTrackId || 'Audio Track',
-        artist: 'Game Audio',
-        album: 'Twine Game',
-        // можно добавить artwork если есть
-      });
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: playingTrackId || 'Audio Track',
+          artist: 'Game Audio',
+          album: 'Twine Game'
+        });
 
-      // Обновляем обработчики для медиа-кнопок
-      navigator.mediaSession.setActionHandler('play', function() {
-        if (playingTrack) playingTrack.play();
-      });
-      
-      navigator.mediaSession.setActionHandler('pause', function() {
-        if (playingTrack) playingTrack.pause();
-      });
+        navigator.mediaSession.setActionHandler('play', function() {
+          if (playingTrack) playingTrack.play();
+        });
+        
+        navigator.mediaSession.setActionHandler('pause', function() {
+          if (playingTrack) playingTrack.pause();
+        });
 
-      console.log('Media Session updated for:', playingTrackId);
+        console.log('Media Session updated for:', playingTrackId);
+      } catch (e) {
+        console.log('Media Session update error:', e);
+      }
     }
-  }, 200); // задержка чтобы макросы успели отработать
+  }, 200);
 });
 
 /* === Show HUD === */
@@ -546,7 +548,6 @@ window.fadeOutTrack = function (trackId, durationMs, onDone) {
     return;
   }
 
-  // Проверяем что трек вообще играет
   if (!track.isPlaying()) {
     if (typeof onDone === "function") onDone();
     return;
